@@ -6,8 +6,9 @@ const OPENAI_KEY = process.env.OPENAI_API_KEY;
 
 export default async function handler(req, res) {
     try {
-        if (req.method !== "POST")
+        if (req.method !== "POST") {
             return res.status(405).json({ error: "Method not allowed" });
+        }
 
         const body = req.body || {};
         const event = body.event || "generic";
@@ -26,7 +27,7 @@ export default async function handler(req, res) {
                 {
                     role: "system",
                     content:
-                        "You are a helpful AI assistant for classroom support. Answer concisely.",
+                        "You are a helpful AI assistant for classroom support. Answer clearly and briefly.",
                 },
                 { role: "user", content: transcriptChunk || "Please provide a short answer." },
             ];
@@ -45,18 +46,24 @@ export default async function handler(req, res) {
             }),
         });
 
-        const data = await response.json();
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error("OpenAI error:", response.status, errText);
+            return res
+                .status(502)
+                .json({ error: "OpenAI API failed", status: response.status, body: errText });
+        }
 
-        const result = {
-            choices: [
-                { message: { content: data?.choices?.[0]?.message?.content || "" } },
-            ],
-        };
+        const data = await response.json();
+        const content = data?.choices?.[0]?.message?.content || "";
+        const result = { choices: [{ message: { content } }] };
 
         cache.set(cacheKey, result);
         return res.status(200).json(result);
     } catch (err) {
-        console.error("AI handler error", err);
-        return res.status(500).json({ error: "Internal error", details: String(err) });
+        console.error("AI handler error:", err);
+        return res
+            .status(500)
+            .json({ error: "Internal error", details: String(err) });
     }
 }
