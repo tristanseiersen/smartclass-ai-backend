@@ -1,12 +1,14 @@
 {
   "name": "smartclass-ai-backend",
   "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "start": "vercel dev",
-    "deploy": "vercel --prod"
+  "type": "module",
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
-    "lru-cache": "^7.14.0"
+    "lru-cache": "^10.0.0"
+  },
+  "scripts": {
+    "start": "vercel dev"
   }
 }
