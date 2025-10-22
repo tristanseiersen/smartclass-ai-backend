@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import fetch from 'native-fetch';
 import LRU from 'lru-cache';
 
 /**
